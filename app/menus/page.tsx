@@ -24,7 +24,8 @@ export default async function MenusPage() {
             <h2 className="mb-2 text-xl font-semibold">{menu.titre}</h2>
             <p className="mb-4 text-sm text-gray-600">{menu.description}</p>
             <p className="text-sm">A partir de {menu.nombre_personne_minimum} personnes</p>
-            <p className="text-lg font-bold">{menu.prix_minimum} EUR</p>
+            <p className="mb-4 text-lg font-bold">{menu.prix_minimum} EUR</p>
+            <a href={`/menus/${menu.id}`} className="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">Voir le detail</a>
           </article>
         ))}
       </div>
