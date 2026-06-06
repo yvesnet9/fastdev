@@ -44,3 +44,35 @@ export async function modifierHoraire(formData: FormData) {
   revalidatePath('/employe/horaires')
   revalidatePath('/')
 }
+
+export async function creerMenu(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return
+  }
+  await supabase.from('menu').insert({
+    titre: String(formData.get('titre') || ''),
+    description: String(formData.get('description') || ''),
+    theme_id: Number(formData.get('theme_id')) || null,
+    regime_id: Number(formData.get('regime_id')) || null,
+    nombre_personne_minimum: Number(formData.get('nombre_personne_minimum')) || 1,
+    prix_minimum: Number(formData.get('prix_minimum')) || 0,
+    conditions: String(formData.get('conditions') || ''),
+    stock_disponible: Number(formData.get('stock_disponible')) || 0,
+  })
+  revalidatePath('/employe/menus')
+  revalidatePath('/menus')
+}
+
+export async function supprimerMenu(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return
+  }
+  const id = Number(formData.get('menu_id'))
+  await supabase.from('menu').delete().eq('id', id)
+  revalidatePath('/employe/menus')
+  revalidatePath('/menus')
+}
