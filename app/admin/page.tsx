@@ -35,6 +35,7 @@ export default async function AdminPage() {
       <h1 className="mb-6 text-3xl font-bold">Espace administrateur</h1>
       <nav className="mb-8 flex flex-wrap gap-3">
         <a href="/admin" className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">Comptes</a>
+        <a href="/admin/stats" className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Statistiques</a>
         <a href="/employe" className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Espace employe</a>
       </nav>
 
