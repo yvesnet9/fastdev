@@ -81,10 +81,13 @@ export default async function GestionMenusPage() {
               <p className="font-semibold">{m.titre}</p>
               <p className="text-sm text-gray-600">{m.prix_minimum} EUR — min {m.nombre_personne_minimum} pers. — stock {m.stock_disponible}</p>
             </div>
-            <form action={supprimerMenu}>
-              <input type="hidden" name="menu_id" value={m.id} />
-              <button type="submit" className="rounded-lg border border-red-300 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50">Supprimer</button>
-            </form>
+           <div className="flex gap-2">
+              <a href={`/employe/menus/${m.id}`} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100">Modifier</a>
+              <form action={supprimerMenu}>
+                <input type="hidden" name="menu_id" value={m.id} />
+                <button type="submit" className="rounded-lg border border-red-300 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50">Supprimer</button>
+              </form>
+            </div>
           </li>
         ))}
       </ul>
