@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { signOut } from '../connexion/actions'
-import { annulerCommande, modifierProfil } from './actions'
+import { annulerCommande, modifierProfil, laisserAvis } from './actions'
 
 const STATUTS: Record<string, string> = {
   en_attente: 'En attente',
@@ -12,6 +12,12 @@ const STATUTS: Record<string, string> = {
   attente_retour_materiel: 'En attente retour materiel',
   termine: 'Terminee',
   annule: 'Annulee',
+}
+
+const AVIS_STATUTS: Record<string, string> = {
+  en_attente: 'en attente de validation',
+  valide: 'valide',
+  refuse: 'refuse',
 }
 
 export default async function ComptePage() {
@@ -32,6 +38,15 @@ export default async function ComptePage() {
     .select('id, numero_commande, nombre_personne, prix_menu, prix_livraison, date_prestation, statut, menu ( titre )')
     .order('id', { ascending: false })
 
+  const { data: mesAvis } = await supabase.from('avis').select('id, commande_id, note, statut')
+
+  const avisParCommande: Record<number, { note: number; statut: string }> = {}
+  for (const a of mesAvis ?? []) {
+    if (a.commande_id != null) {
+      avisParCommande[a.commande_id] = { note: a.note, statut: a.statut }
+    }
+  }
+
   return (
     <main className="mx-auto max-w-3xl p-8 text-gray-900">
       <div className="mb-6 flex items-center justify-between">
@@ -47,23 +62,47 @@ export default async function ComptePage() {
         <p className="rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500">Vous n'avez pas encore de commande. <a href="/menus" className="text-amber-700 hover:underline">Voir les menus</a></p>
       ) : (
         <ul className="space-y-4">
-          {commandes.map((c) => (
-            <li key={c.id} className="rounded-xl border border-gray-200 p-5 shadow-sm">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="font-semibold">{c.menu?.titre ?? 'Menu'}</span>
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs text-amber-800">{STATUTS[c.statut] ?? c.statut}</span>
-              </div>
-              <p className="text-sm text-gray-600">Commande {c.numero_commande}</p>
-              <p className="text-sm text-gray-600">{c.nombre_personne} personnes{c.date_prestation ? ' — prestation le ' + c.date_prestation : ''}</p>
-              <p className="mt-2 font-bold">{(Number(c.prix_menu) + Number(c.prix_livraison)).toFixed(2)} EUR</p>
-              {c.statut === 'en_attente' && (
-                <form action={annulerCommande} className="mt-3">
-                  <input type="hidden" name="commande_id" value={c.id} />
-                  <button type="submit" className="rounded-lg border border-red-300 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50">Annuler la commande</button>
-                </form>
-              )}
-            </li>
-          ))}
+          {commandes.map((c) => {
+            const avis = avisParCommande[c.id]
+            return (
+              <li key={c.id} className="rounded-xl border border-gray-200 p-5 shadow-sm">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="font-semibold">{c.menu?.titre ?? 'Menu'}</span>
+                  <span className="rounded-full bg-amber-100 px-3 py-1 text-xs text-amber-800">{STATUTS[c.statut] ?? c.statut}</span>
+                </div>
+                <p className="text-sm text-gray-600">Commande {c.numero_commande}</p>
+                <p className="text-sm text-gray-600">{c.nombre_personne} personnes{c.date_prestation ? ' — prestation le ' + c.date_prestation : ''}</p>
+                <p className="mt-2 font-bold">{(Number(c.prix_menu) + Number(c.prix_livraison)).toFixed(2)} EUR</p>
+
+                {c.statut === 'en_attente' && (
+                  <form action={annulerCommande} className="mt-3">
+                    <input type="hidden" name="commande_id" value={c.id} />
+                    <button type="submit" className="rounded-lg border border-red-300 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50">Annuler la commande</button>
+                  </form>
+                )}
+
+                {c.statut === 'termine' && !avis && (
+                  <form action={laisserAvis} className="mt-3 space-y-2 border-t border-gray-100 pt-3">
+                    <label className="block text-sm font-medium text-gray-700">Votre note</label>
+                    <input type="hidden" name="commande_id" value={c.id} />
+                    <select name="note" defaultValue="5" className="w-full rounded border border-gray-300 bg-white p-2 text-gray-900">
+                      <option value="5">5 - Excellent</option>
+                      <option value="4">4 - Tres bien</option>
+                      <option value="3">3 - Bien</option>
+                      <option value="2">2 - Moyen</option>
+                      <option value="1">1 - Decevant</option>
+                    </select>
+                    <textarea name="commentaire" rows={3} placeholder="Partagez votre experience..." className="w-full rounded border border-gray-300 bg-white p-2 text-gray-900"></textarea>
+                    <button type="submit" className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700">Laisser un avis</button>
+                  </form>
+                )}
+
+                {c.statut === 'termine' && avis && (
+                  <p className="mt-3 border-t border-gray-100 pt-3 text-sm text-green-700">Avis envoye : {avis.note}/5 ({AVIS_STATUTS[avis.statut] ?? avis.statut})</p>
+                )}
+              </li>
+            )
+          })}
         </ul>
       )}
 
