@@ -27,19 +27,13 @@ export default async function MenuDetailPage({
   const plats = menu.menu_plat?.map((mp) => mp.plat) ?? []
 
   return (
-    <main className="mx-auto max-w-3xl p-8">
-      <a href="/menus" className="mb-6 inline-block text-sm text-amber-700 hover:underline">
-        &larr; Retour aux menus
-      </a>
+    <main className="mx-auto max-w-3xl p-8 text-gray-900">
+      <a href="/menus" className="mb-6 inline-block text-sm text-amber-700 hover:underline">&larr; Retour aux menus</a>
 
       <h1 className="mb-2 text-3xl font-bold">{menu.titre}</h1>
       <div className="mb-4 flex gap-2 text-xs">
-        {menu.theme?.libelle && (
-          <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800">{menu.theme.libelle}</span>
-        )}
-        {menu.regime?.libelle && (
-          <span className="rounded-full bg-green-100 px-3 py-1 text-green-800">{menu.regime.libelle}</span>
-        )}
+        {menu.theme?.libelle && (<span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800">{menu.theme.libelle}</span>)}
+        {menu.regime?.libelle && (<span className="rounded-full bg-green-100 px-3 py-1 text-green-800">{menu.regime.libelle}</span>)}
       </div>
 
       <p className="mb-6 text-gray-700">{menu.description}</p>
@@ -63,9 +57,7 @@ export default async function MenuDetailPage({
             <li key={plat.id} className="rounded-lg border border-gray-200 p-3">
               <span className="text-xs uppercase text-gray-400">{plat.type}</span>
               <p className="font-medium">{plat.libelle}</p>
-              {allergenes.length > 0 && (
-                <p className="text-xs text-gray-500">Allergenes : {allergenes.join(', ')}</p>
-              )}
+              {allergenes.length > 0 && (<p className="text-xs text-gray-500">Allergenes : {allergenes.join(', ')}</p>)}
             </li>
           )
         })}
@@ -77,6 +69,8 @@ export default async function MenuDetailPage({
       </div>
 
       <p className="mt-4 text-sm text-gray-500">Stock disponible : {menu.stock_disponible}</p>
+
+      <a href={`/commande/${menu.id}`} className="mt-6 block w-full rounded-lg bg-amber-600 px-4 py-3 text-center font-medium text-white hover:bg-amber-700">Commander ce menu</a>
     </main>
   )
 }
