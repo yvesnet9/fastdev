@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { getDb } from '@/utils/mongodb/client'
 
 export async function creerCommande(formData: FormData) {
   const supabase = await createClient()
@@ -20,7 +21,7 @@ export async function creerCommande(formData: FormData) {
 
   const { data: menu } = await supabase
     .from('menu')
-    .select('prix_minimum, nombre_personne_minimum')
+    .select('titre, prix_minimum, nombre_personne_minimum')
     .eq('id', menuId)
     .single()
 
@@ -38,13 +39,17 @@ export async function creerCommande(formData: FormData) {
   const horsBordeaux = ville.trim().toLowerCase() !== 'bordeaux'
   const prixLivraison = horsBordeaux ? 5 + 0.59 * km : 0
 
+  const numeroCommande = 'CMD-' + Date.now()
+  const prixMenuFinal = Number(prixMenu.toFixed(2))
+  const prixLivraisonFinal = Number(prixLivraison.toFixed(2))
+
   const { error } = await supabase.from('commande').insert({
-    numero_commande: 'CMD-' + Date.now(),
+    numero_commande: numeroCommande,
     utilisateur_id: user.id,
     menu_id: menuId,
     nombre_personne: personnes,
-    prix_menu: Number(prixMenu.toFixed(2)),
-    prix_livraison: Number(prixLivraison.toFixed(2)),
+    prix_menu: prixMenuFinal,
+    prix_livraison: prixLivraisonFinal,
     date_prestation: date || null,
     heure_livraison: heure || null,
     lieu_livraison: lieu || null,
@@ -52,6 +57,23 @@ export async function creerCommande(formData: FormData) {
 
   if (error) {
     redirect('/commande/merci?error=' + encodeURIComponent(error.message))
+  }
+
+  // Statistique dans MongoDB (base NoSQL) pour le tableau de bord admin
+  try {
+    const db = await getDb()
+    await db.collection('statistiques_commandes').insertOne({
+      numero_commande: numeroCommande,
+      menu_id: menuId,
+      menu_titre: menu.titre,
+      nombre_personne: personnes,
+      prix_menu: prixMenuFinal,
+      prix_livraison: prixLivraisonFinal,
+      total: Number((prixMenuFinal + prixLivraisonFinal).toFixed(2)),
+      date_commande: new Date(),
+    })
+  } catch (e) {
+    console.error('MongoDB stat non enregistree :', e)
   }
 
   redirect('/commande/merci')
