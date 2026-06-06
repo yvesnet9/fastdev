@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { changerStatut } from './actions'
 
 const STATUTS: Record<string, string> = {
   en_attente: 'En attente',
@@ -52,7 +53,23 @@ export default async function EmployePage() {
               <p className="text-sm text-gray-600">Commande {c.numero_commande}</p>
               <p className="text-sm text-gray-600">Client : {c.utilisateur?.prenom} {c.utilisateur?.nom}</p>
               <p className="text-sm text-gray-600">{c.nombre_personne} personnes{c.date_prestation ? ' — prestation le ' + c.date_prestation : ''}</p>
-              <p className="mt-2 font-bold">{(Number(c.prix_menu) + Number(c.prix_livraison)).toFixed(2)} EUR</p>
+              <p className="mb-3 mt-2 font-bold">{(Number(c.prix_menu) + Number(c.prix_livraison)).toFixed(2)} EUR</p>
+
+              <form action={changerStatut} className="flex flex-wrap items-center gap-2 border-t border-gray-100 pt-3">
+                <input type="hidden" name="commande_id" value={c.id} />
+                <label className="text-sm text-gray-600">Statut :</label>
+                <select name="statut" defaultValue={c.statut} className="rounded border border-gray-300 bg-white p-2 text-sm text-gray-900">
+                  <option value="en_attente">En attente</option>
+                  <option value="accepte">Acceptee</option>
+                  <option value="en_preparation">En preparation</option>
+                  <option value="en_cours_livraison">En cours de livraison</option>
+                  <option value="livre">Livree</option>
+                  <option value="attente_retour_materiel">En attente retour materiel</option>
+                  <option value="termine">Terminee</option>
+                  <option value="annule">Annulee</option>
+                </select>
+                <button type="submit" className="rounded-lg bg-amber-600 px-3 py-2 text-sm font-medium text-white hover:bg-amber-700">Mettre a jour</button>
+              </form>
             </li>
           ))}
         </ul>
