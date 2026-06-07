@@ -3,6 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { getDb } from '@/utils/mongodb/client'
+import { envoyerEmail } from '@/utils/email/envoyer'
 
 export async function creerCommande(formData: FormData) {
   const supabase = await createClient()
@@ -42,6 +43,7 @@ export async function creerCommande(formData: FormData) {
   const numeroCommande = 'CMD-' + Date.now()
   const prixMenuFinal = Number(prixMenu.toFixed(2))
   const prixLivraisonFinal = Number(prixLivraison.toFixed(2))
+  const totalFinal = Number((prixMenuFinal + prixLivraisonFinal).toFixed(2))
 
   const { error } = await supabase.from('commande').insert({
     numero_commande: numeroCommande,
@@ -69,11 +71,34 @@ export async function creerCommande(formData: FormData) {
       nombre_personne: personnes,
       prix_menu: prixMenuFinal,
       prix_livraison: prixLivraisonFinal,
-      total: Number((prixMenuFinal + prixLivraisonFinal).toFixed(2)),
+      total: totalFinal,
       date_commande: new Date(),
     })
   } catch (e) {
     console.error('MongoDB stat non enregistree :', e)
+  }
+
+  // Mail de confirmation de commande
+  if (user.email) {
+    await envoyerEmail(
+      user.email,
+      'Confirmation de votre commande ' + numeroCommande,
+      `<div style="font-family: Arial, sans-serif; color: #1f2937;">
+        <h1 style="color: #d97706;">Commande confirmee !</h1>
+        <p>Merci pour votre commande chez Vite & Gourmand.</p>
+        <table style="margin-top: 16px; border-collapse: collapse;">
+          <tr><td style="padding: 4px 12px 4px 0;">Numero</td><td><strong>${numeroCommande}</strong></td></tr>
+          <tr><td style="padding: 4px 12px 4px 0;">Menu</td><td>${menu.titre}</td></tr>
+          <tr><td style="padding: 4px 12px 4px 0;">Nombre de personnes</td><td>${personnes}</td></tr>
+          <tr><td style="padding: 4px 12px 4px 0;">Date prestation</td><td>${date || 'a definir'}</td></tr>
+          <tr><td style="padding: 4px 12px 4px 0;">Prix menu</td><td>${prixMenuFinal.toFixed(2)} EUR</td></tr>
+          <tr><td style="padding: 4px 12px 4px 0;">Livraison</td><td>${prixLivraisonFinal.toFixed(2)} EUR</td></tr>
+          <tr><td style="padding: 8px 12px 4px 0; border-top: 1px solid #e5e7eb;"><strong>Total</strong></td><td style="border-top: 1px solid #e5e7eb;"><strong>${totalFinal.toFixed(2)} EUR</strong></td></tr>
+        </table>
+        <p style="margin-top: 24px;">Vous pouvez suivre l'etat de votre commande dans votre espace client.</p>
+        <p>A tres bientot,<br>L'equipe Vite & Gourmand</p>
+      </div>`
+    )
   }
 
   redirect('/commande/merci')
