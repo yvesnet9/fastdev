@@ -25,6 +25,7 @@ export default async function Footer() {
           <ul className="space-y-1 text-sm text-gray-400">
             <li><a href="/mentions-legales" className="hover:text-white">Mentions legales</a></li>
             <li><a href="/cgv" className="hover:text-white">CGV</a></li>
+            <li><a href="/contact" className="hover:text-white">Contact</a></li>
           </ul>
         </div>
       </div>
