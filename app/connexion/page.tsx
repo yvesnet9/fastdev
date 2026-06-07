@@ -18,7 +18,7 @@ export default async function ConnexionPage({
         <input name="password" type="password" placeholder="Mot de passe" required className="w-full rounded border border-gray-300 p-2" />
         <button type="submit" className="w-full rounded-lg bg-amber-600 px-4 py-2 font-medium text-white hover:bg-amber-700">Se connecter</button>
       </form>
-
+      <p className="mt-4 text-sm"><a href="/mot-de-passe-oublie" className="text-amber-700 hover:underline">Mot de passe oublie ?</a></p>
       <p className="mt-4 text-sm text-gray-600">Pas encore de compte ? <a href="/inscription" className="text-amber-700 hover:underline">Creer un compte</a></p>
     </main>
   )
