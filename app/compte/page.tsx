@@ -67,8 +67,8 @@ export default async function ComptePage() {
             return (
               <li key={c.id} className="rounded-xl border border-gray-200 p-5 shadow-sm">
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="font-semibold">{c.menu?.titre ?? 'Menu'}</span>
                   <span className="rounded-full bg-amber-100 px-3 py-1 text-xs text-amber-800">{STATUTS[c.statut] ?? c.statut}</span>
+                  <span className="font-semibold">{(() => { const m = c.menu as { titre?: string } | { titre?: string }[] | null; return (Array.isArray(m) ? m[0]?.titre : m?.titre) ?? 'Menu' })()}</span>
                 </div>
                 <p className="text-sm text-gray-600">Commande {c.numero_commande}</p>
                 <p className="text-sm text-gray-600">{c.nombre_personne} personnes{c.date_prestation ? ' — prestation le ' + c.date_prestation : ''}</p>
