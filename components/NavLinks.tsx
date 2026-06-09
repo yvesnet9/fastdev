@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { signOut } from '@/app/connexion/actions'
 
-export default function NavLinks({ connecte }: { connecte: boolean }) {
+export default function NavLinks({ connecte, roleId = 0 }: { connecte: boolean; roleId?: number }) {
   const [ouvert, setOuvert] = useState(false)
 
   const liens = (
@@ -12,6 +12,12 @@ export default function NavLinks({ connecte }: { connecte: boolean }) {
       {connecte ? (
         <>
           <a href="/compte" className="text-gray-700 hover:text-amber-700">Mon compte</a>
+          {roleId >= 2 && (
+            <a href="/employe" className="text-gray-700 hover:text-amber-700">Espace employe</a>
+          )}
+          {roleId >= 3 && (
+            <a href="/admin" className="text-gray-700 hover:text-amber-700">Espace admin</a>
+          )}
           <form action={signOut}><button type="submit" className="rounded-lg bg-gray-800 px-3 py-1.5 text-white hover:bg-gray-900">Deconnexion</button></form>
         </>
       ) : (
